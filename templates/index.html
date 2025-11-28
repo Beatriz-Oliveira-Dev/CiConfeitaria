@@ -1,80 +1,132 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<section class="card">
-  <h2>Nova receita</h2>
-  <form class="recipe-form" method="post" action="{{ url_for('create_recipe') }}">
-    <div class="form-group">
-      <label for="title">Título *</label>
-      <input id="title" name="title" type="text" placeholder="Bolo de chocolate" required>
-    </div>
-    <div class="form-group">
-      <label for="description">Descrição curta *</label>
-      <input id="description" name="description" type="text" placeholder="Uma sobremesa clássica e fofinha" required>
-    </div>
-    <div class="form-group">
-      <label for="ingredients">Ingredientes (um por linha) *</label>
-      <textarea id="ingredients" name="ingredients" rows="4" placeholder="2 xícaras de farinha\n3 ovos\n1 xícara de açúcar" required></textarea>
-    </div>
-    <div class="form-group">
-      <label for="instructions">Modo de preparo (um passo por linha) *</label>
-      <textarea id="instructions" name="instructions" rows="4" placeholder="Pré-aqueça o forno a 180ºC\nMisture os secos\nAcrescente os ovos e mexa" required></textarea>
-    </div>
-    <div class="form-group">
-      <label for="image_url">Link de imagem (opcional)</label>
-      <input id="image_url" name="image_url" type="url" placeholder="https://exemplo.com/bolo.jpg">
-    </div>
-    <button type="submit" class="btn">Cadastrar</button>
-  </form>
+<section class="hero">
+  <div class="hero-text">
+    <p class="eyebrow">Cardápio da Casa</p>
+    <h1>Inspire-se e adicione sabor ao seu dia!</h1>
+    <p class="lead">Explore receitas doces com visual de vitrine, abra o card para ver ingredientes e modo de preparo.</p>
+  </div>
+  <div class="hero-art" aria-hidden="true">✨</div>
 </section>
 
-<section class="card">
-  <div class="card-header">
-    <h2>Receitas cadastradas</h2>
-    <p>{{ recipes|length }} itens</p>
-  </div>
-
+<section class="gallery">
   {% if recipes %}
-  <div class="recipe-grid">
+  <div class="pin-grid">
     {% for recipe in recipes %}
-    <article class="recipe">
-      {% if recipe.image_url %}
-      <img src="{{ recipe.image_url }}" alt="Imagem de {{ recipe.title }}" class="recipe-image" loading="lazy">
-      {% endif %}
-      <div class="recipe-body">
-        <div class="recipe-title">
+      <article class="pin-card" tabindex="0"
+        data-id="{{ recipe.id }}"
+        data-title="{{ recipe.title }}"
+        data-description="{{ recipe.description }}"
+        data-image="{{ recipe.image_url or url_for('static', filename='placeholder.svg') }}"
+        data-ingredients='{{ recipe.ingredients.split("\n")|tojson }}'
+        data-instructions='{{ recipe.instructions.split("\n")|tojson }}'>
+        <div class="pin-media">
+          <img src="{{ recipe.image_url or url_for('static', filename='placeholder.svg') }}" alt="{{ recipe.title }}" loading="lazy">
+          <button class="pin-fav" type="button" aria-label="Favoritar">♡</button>
+        </div>
+        <div class="pin-info">
           <h3>{{ recipe.title }}</h3>
-          <form method="post" action="{{ url_for('delete_recipe', recipe_id=recipe.id) }}" class="inline">
-            <button type="submit" class="link">Apagar</button>
-          </form>
+          <p>{{ recipe.description }}</p>
         </div>
-        <p class="muted">{{ recipe.description }}</p>
-        <div class="pill-group">
-          <span class="pill">{{ recipe.created_at.strftime('%d/%m/%Y') }}</span>
-          <span class="pill">{{ recipe.ingredients.split('\n')|length }} ingredientes</span>
-        </div>
-        <details>
-          <summary>Ingredientes</summary>
-          <ul>
-            {% for item in recipe.ingredients.split('\n') %}
-              <li>{{ item }}</li>
-            {% endfor %}
-          </ul>
-        </details>
-        <details>
-          <summary>Modo de preparo</summary>
-          <ol>
-            {% for step in recipe.instructions.split('\n') %}
-              <li>{{ step }}</li>
-            {% endfor %}
-          </ol>
-        </details>
-      </div>
-    </article>
+      </article>
     {% endfor %}
   </div>
   {% else %}
-    <p class="muted">Nenhuma receita cadastrada ainda. Que tal adicionar a primeira?</p>
+    <div class="empty-state">
+      <p>Ainda não temos receitas cadastradas. Clique em "Cadastrar Receita" no topo para adicionar a primeira delícia!</p>
+    </div>
   {% endif %}
 </section>
+
+<div class="modal" id="recipe-modal" aria-hidden="true" role="dialog">
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal-dialog" role="document">
+    <button class="modal-close" type="button" data-close aria-label="Fechar">✕</button>
+    <div class="modal-media">
+      <img id="modal-image" src="" alt="Visual da receita">
+    </div>
+    <div class="modal-body">
+      <p class="eyebrow">Receita</p>
+      <h2 id="modal-title"></h2>
+      <p id="modal-description" class="lead"></p>
+      <h3>Ingredientes</h3>
+      <ul id="modal-ingredients"></ul>
+      <h3>Modo de Preparo</h3>
+      <ol id="modal-instructions"></ol>
+      <div class="modal-actions">
+        <a class="btn ghost" id="edit-link" href="#">Atualizar História</a>
+        <form id="delete-form" method="post" action="#">
+          <button type="submit" class="btn danger">Deletar Receita</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const modal = document.getElementById('recipe-modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalDesc = document.getElementById('modal-description');
+  const modalImg = document.getElementById('modal-image');
+  const modalIngredients = document.getElementById('modal-ingredients');
+  const modalInstructions = document.getElementById('modal-instructions');
+  const editLink = document.getElementById('edit-link');
+  const deleteForm = document.getElementById('delete-form');
+
+  function closeModal() {
+    modal.setAttribute('aria-hidden', 'true');
+    modal.classList.remove('open');
+  }
+
+  function openModal(card) {
+    const { id, title, description, image } = card.dataset;
+    const ingredients = JSON.parse(card.dataset.ingredients || '[]');
+    const instructions = JSON.parse(card.dataset.instructions || '[]');
+
+    modalTitle.textContent = title;
+    modalDesc.textContent = description;
+    modalImg.src = image;
+    modalImg.alt = title;
+
+    modalIngredients.innerHTML = '';
+    ingredients.forEach(item => {
+      const li = document.createElement('li');
+      li.textContent = item;
+      modalIngredients.appendChild(li);
+    });
+
+    modalInstructions.innerHTML = '';
+    instructions.forEach(step => {
+      const li = document.createElement('li');
+      li.textContent = step;
+      modalInstructions.appendChild(li);
+    });
+
+    editLink.href = `${card.dataset.id ? '/cadastrar?recipe_id=' + card.dataset.id : '#'}`;
+    deleteForm.action = `/recipes/${card.dataset.id}/delete`;
+
+    modal.setAttribute('aria-hidden', 'false');
+    modal.classList.add('open');
+  }
+
+  document.querySelectorAll('.pin-card').forEach(card => {
+    card.addEventListener('click', () => openModal(card));
+    card.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        openModal(card);
+      }
+    });
+  });
+
+  document.querySelectorAll('[data-close]').forEach(el => {
+    el.addEventListener('click', closeModal);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeModal();
+    }
+  });
+</script>
 {% endblock %}

@@ -3,22 +3,35 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CiConfeitaria</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap">
+    <title>Ci Confeitaria</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   </head>
   <body>
-    <header class="navbar">
-      <h1 class="brand">CiConfeitaria</h1>
-      <p class="tagline">Cardápio doce e simples para sua vitrine digital</p>
+    <header class="site-header">
+      <div class="nav-content">
+        <a class="brand" href="{{ url_for('index') }}">
+          <div class="brand-mark">
+            <span class="brand-icon">🧁</span>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name">Ci Confeitaria</span>
+            <span class="brand-tag">Doces feitos com carinho</span>
+          </div>
+        </a>
+        <nav class="menu">
+          <a class="menu-link" href="{{ url_for('index') }}">Home</a>
+          <a class="menu-link" href="{{ url_for('form_page') }}">Cadastrar Receita</a>
+        </nav>
+        <div class="nav-actions">
+          <span class="nav-search" aria-hidden="true">🔍</span>
+          <span class="nav-favorites" aria-hidden="true">♡</span>
+        </div>
+      </div>
     </header>
 
-    <main class="container">
-      {% block content %}{% endblock %}
-    </main>
-
-    <footer class="footer">
-      <p>Feito para a disciplina de extensão — organize receitas, cadastre e apague pratos com facilidade.</p>
-    </footer>
+    <main class="page">{% block content %}{% endblock %}</main>
   </body>
 </html>

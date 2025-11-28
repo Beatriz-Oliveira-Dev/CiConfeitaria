@@ -1,6 +1,6 @@
 # CiConfeitaria
 
-Aplicação web simples para cadastrar, listar e apagar receitas de confeitaria. Usa Flask com SQLite e oferece uma interface amigável em português.
+Aplicação web simples para cadastrar, atualizar, listar e apagar receitas de confeitaria. Usa Flask com SQLite e oferece uma interface em português com layout inspirado em vitrines de confeitaria.
 
 ## Pré-requisitos
 - Python 3.10+
@@ -17,13 +17,19 @@ Aplicação web simples para cadastrar, listar e apagar receitas de confeitaria.
    ```
    O banco `recipes.db` será criado automaticamente na raiz do projeto.
 3. Acesse o site em [http://localhost:5000](http://localhost:5000).
+   - Home com grade estilo Pinterest: `GET /`
+   - Formulário de cadastro/edição: `GET /cadastrar`
 
 ## Endpoints principais
 - Interface web: `GET /`
+- Formulário de cadastro/edição: `GET /cadastrar`
 - Criar receita via formulário: `POST /recipes`
+- Atualizar receita via formulário: `POST /recipes/<id>/update`
 - Apagar receita via formulário: `POST /recipes/<id>/delete`
 - API listar receitas: `GET /api/recipes`
 - API criar receita: `POST /api/recipes`
+- API atualizar receita: `PUT|PATCH /api/recipes/<id>`
+
 - API apagar receita: `DELETE /api/recipes/<id>`
 
 ## Notas
