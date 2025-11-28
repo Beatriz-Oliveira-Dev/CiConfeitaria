@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CiConfeitaria</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <header class="navbar">
+      <h1 class="brand">CiConfeitaria</h1>
+      <p class="tagline">Cardápio doce e simples para sua vitrine digital</p>
+    </header>
+
+    <main class="container">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+      <p>Feito para a disciplina de extensão — organize receitas, cadastre e apague pratos com facilidade.</p>
+    </footer>
+  </body>
+</html>
