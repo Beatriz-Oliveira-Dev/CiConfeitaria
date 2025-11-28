@@ -331,6 +331,15 @@ a {
   gap: 16px;
 }
 
+.alert {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #f2c8cc;
+  background: #fff1f3;
+  color: #7b2f3a;
+  font-weight: 600;
+}
+
 .form-row {
   display: flex;
   flex-direction: column;

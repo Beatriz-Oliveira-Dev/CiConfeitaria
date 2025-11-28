@@ -69,10 +69,8 @@ def create_recipe():
     image_url = request.form.get("image_url", "").strip() or None
 
     if not all([title, description, ingredients, instructions]):
-        return (
-            jsonify({"error": "Todos os campos obrigatórios devem ser preenchidos."}),
-            400,
-        )
+        error = "Todos os campos obrigatórios devem ser preenchidos."
+        return render_template("create.html", recipe=None, error=error), 400
 
     recipe = Recipe(
         title=title,
@@ -98,10 +96,8 @@ def update_recipe(recipe_id: int):
     image_url = request.form.get("image_url", "").strip() or None
 
     if not all([title, description, ingredients, instructions]):
-        return (
-            jsonify({"error": "Todos os campos obrigatórios devem ser preenchidos."}),
-            400,
-        )
+        error = "Todos os campos obrigatórios devem ser preenchidos."
+        return render_template("create.html", recipe=recipe, error=error), 400
 
     recipe.title = title
     recipe.description = description

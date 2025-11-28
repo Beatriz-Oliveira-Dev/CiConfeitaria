@@ -11,30 +11,35 @@
 
 <section class="form-shell">
   <form class="recipe-card" method="post" action="{{ url_for('update_recipe', recipe_id=recipe.id) if recipe else url_for('create_recipe') }}">
+    {% if error %}
+      <div class="alert">
+        {{ error }}
+      </div>
+    {% endif %}
     <div class="form-row">
       <label for="title">Nome da Receita *</label>
-      <input type="text" id="title" name="title" placeholder="Macarons Coloridos" value="{{ recipe.title if recipe else '' }}" required>
+      <input type="text" id="title" name="title" placeholder="Macarons Coloridos" value="{{ request.form.get('title', recipe.title) if recipe else request.form.get('title', '') }}" required>
     </div>
     <div class="form-row">
       <label for="description">Descrição Curta *</label>
-      <input type="text" id="description" name="description" placeholder="Um docinho clássico para adoçar o dia" value="{{ recipe.description if recipe else '' }}" required>
+      <input type="text" id="description" name="description" placeholder="Um docinho clássico para adoçar o dia" value="{{ request.form.get('description', recipe.description) if recipe else request.form.get('description', '') }}" required>
     </div>
     <div class="form-row">
       <label for="image_url">Imagem da Receita (URL)</label>
-      <input type="url" id="image_url" name="image_url" placeholder="https://exemplo.com/bolo.jpg" value="{{ recipe.image_url if recipe else '' }}">
+      <input type="url" id="image_url" name="image_url" placeholder="https://exemplo.com/bolo.jpg" value="{{ request.form.get('image_url', recipe.image_url) if recipe else request.form.get('image_url', '') }}">
     </div>
     <div class="form-row two-cols">
       <div>
         <label for="ingredients">Ingredientes (um por linha) *</label>
         <textarea id="ingredients" name="ingredients" rows="6" placeholder="2 xícaras de farinha
 4 ovos
-1 xícara de açúcar" required>{{ recipe.ingredients if recipe else '' }}</textarea>
+1 xícara de açúcar" required>{{ request.form.get('ingredients', recipe.ingredients) if recipe else request.form.get('ingredients', '') }}</textarea>
       </div>
       <div>
         <label for="instructions">Modo de Preparo (um passo por linha) *</label>
         <textarea id="instructions" name="instructions" rows="6" placeholder="1. Pré-aqueça o forno
 2. Misture os secos
-3. Adicione os ovos" required>{{ recipe.instructions if recipe else '' }}</textarea>
+3. Adicione os ovos" required>{{ request.form.get('instructions', recipe.instructions) if recipe else request.form.get('instructions', '') }}</textarea>
       </div>
     </div>
     <div class="form-actions">
