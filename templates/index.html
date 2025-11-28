@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="card">
+  <h2>Nova receita</h2>
+  <form class="recipe-form" method="post" action="{{ url_for('create_recipe') }}">
+    <div class="form-group">
+      <label for="title">Título *</label>
+      <input id="title" name="title" type="text" placeholder="Bolo de chocolate" required>
+    </div>
+    <div class="form-group">
+      <label for="description">Descrição curta *</label>
+      <input id="description" name="description" type="text" placeholder="Uma sobremesa clássica e fofinha" required>
+    </div>
+    <div class="form-group">
+      <label for="ingredients">Ingredientes (um por linha) *</label>
+      <textarea id="ingredients" name="ingredients" rows="4" placeholder="2 xícaras de farinha\n3 ovos\n1 xícara de açúcar" required></textarea>
+    </div>
+    <div class="form-group">
+      <label for="instructions">Modo de preparo (um passo por linha) *</label>
+      <textarea id="instructions" name="instructions" rows="4" placeholder="Pré-aqueça o forno a 180ºC\nMisture os secos\nAcrescente os ovos e mexa" required></textarea>
+    </div>
+    <div class="form-group">
+      <label for="image_url">Link de imagem (opcional)</label>
+      <input id="image_url" name="image_url" type="url" placeholder="https://exemplo.com/bolo.jpg">
+    </div>
+    <button type="submit" class="btn">Cadastrar</button>
+  </form>
+</section>
+
+<section class="card">
+  <div class="card-header">
+    <h2>Receitas cadastradas</h2>
+    <p>{{ recipes|length }} itens</p>
+  </div>
+
+  {% if recipes %}
+  <div class="recipe-grid">
+    {% for recipe in recipes %}
+    <article class="recipe">
+      {% if recipe.image_url %}
+      <img src="{{ recipe.image_url }}" alt="Imagem de {{ recipe.title }}" class="recipe-image" loading="lazy">
+      {% endif %}
+      <div class="recipe-body">
+        <div class="recipe-title">
+          <h3>{{ recipe.title }}</h3>
+          <form method="post" action="{{ url_for('delete_recipe', recipe_id=recipe.id) }}" class="inline">
+            <button type="submit" class="link">Apagar</button>
+          </form>
+        </div>
+        <p class="muted">{{ recipe.description }}</p>
+        <div class="pill-group">
+          <span class="pill">{{ recipe.created_at.strftime('%d/%m/%Y') }}</span>
+          <span class="pill">{{ recipe.ingredients.split('\n')|length }} ingredientes</span>
+        </div>
+        <details>
+          <summary>Ingredientes</summary>
+          <ul>
+            {% for item in recipe.ingredients.split('\n') %}
+              <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        </details>
+        <details>
+          <summary>Modo de preparo</summary>
+          <ol>
+            {% for step in recipe.instructions.split('\n') %}
+              <li>{{ step }}</li>
+            {% endfor %}
+          </ol>
+        </details>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+    <p class="muted">Nenhuma receita cadastrada ainda. Que tal adicionar a primeira?</p>
+  {% endif %}
+</section>
+{% endblock %}
