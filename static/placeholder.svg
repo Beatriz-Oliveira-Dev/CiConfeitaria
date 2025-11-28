@@ -1,0 +1,21 @@
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Imagem de receita</title>
+  <desc id="desc">Plano de fundo creme com ícone de cupcake.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fef8f2" />
+      <stop offset="100%" stop-color="#f7e8de" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)" rx="28" />
+  <g transform="translate(260 170)">
+    <circle cx="140" cy="120" r="110" fill="#f2c6c6" opacity="0.45" />
+    <circle cx="120" cy="140" r="110" fill="#e2a4b1" opacity="0.4" />
+    <path d="M80 210h160l-16 32c-4 8-12 13-21 13H117c-9 0-17-5-21-13z" fill="#f4d6c2" />
+    <path d="M80 170h160c0 22-18 40-40 40H120c-22 0-40-18-40-40z" fill="#f99aa7" />
+    <path d="M98 140c6-28 26-50 62-50s56 22 62 50c-20 6-40 10-62 10s-42-4-62-10z" fill="#fdd9d9" />
+    <circle cx="190" cy="120" r="12" fill="#f7c266" />
+    <circle cx="140" cy="118" r="10" fill="#f7c266" />
+    <circle cx="110" cy="128" r="9" fill="#f7c266" />
+  </g>
+</svg>
