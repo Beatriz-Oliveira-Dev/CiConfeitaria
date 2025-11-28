@@ -52,14 +52,11 @@ def index():
     recipes: List[Recipe] = Recipe.query.order_by(Recipe.created_at.desc()).all()
     return render_template("index.html", recipes=recipes)
 
-
 @app.route("/cadastrar")
 def form_page():
     recipe_id = request.args.get("recipe_id", type=int)
     recipe = Recipe.query.get_or_404(recipe_id) if recipe_id else None
     return render_template("create.html", recipe=recipe)
-
-
 @app.route("/recipes", methods=["POST"])
 def create_recipe():
     title = request.form.get("title", "").strip()
@@ -71,7 +68,6 @@ def create_recipe():
     if not all([title, description, ingredients, instructions]):
         error = "Todos os campos obrigatórios devem ser preenchidos."
         return render_template("create.html", recipe=None, error=error), 400
-
     recipe = Recipe(
         title=title,
         description=description,
@@ -83,7 +79,6 @@ def create_recipe():
     db.session.commit()
 
     return redirect(url_for("index"))
-
 
 @app.route("/recipes/<int:recipe_id>/update", methods=["POST"])
 def update_recipe(recipe_id: int):
@@ -107,7 +102,6 @@ def update_recipe(recipe_id: int):
     db.session.commit()
 
     return redirect(url_for("index"))
-
 
 @app.route("/recipes/<int:recipe_id>/delete", methods=["POST"])
 def delete_recipe(recipe_id: int):
@@ -147,7 +141,6 @@ def api_create_recipe():
 
     return jsonify(recipe.to_dict()), 201
 
-
 @app.route("/api/recipes/<int:recipe_id>", methods=["PUT", "PATCH"])
 def api_update_recipe(recipe_id: int):
     recipe = Recipe.query.get_or_404(recipe_id)
@@ -172,8 +165,6 @@ def api_update_recipe(recipe_id: int):
     db.session.commit()
 
     return jsonify(recipe.to_dict())
-
-
 @app.route("/api/recipes/<int:recipe_id>", methods=["DELETE"])
 def api_delete_recipe(recipe_id: int):
     recipe = Recipe.query.get_or_404(recipe_id)
