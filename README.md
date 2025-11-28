@@ -35,3 +35,4 @@ Aplicação web simples para cadastrar, atualizar, listar e apagar receitas de c
 - Campos obrigatórios: título, descrição, ingredientes e modo de preparo.
 - O campo de imagem é opcional e aceita apenas uma URL.
 - Ingredientes e passos podem ser informados linha a linha no formulário.
+- O arquivo do banco SQLite (`recipes.db`) fica fora do versionamento para evitar conflitos; ele é recriado automaticamente ao subir a aplicação.
