@@ -20,10 +20,15 @@
         data-description="{{ recipe.description }}"
         data-image="{{ recipe.image_url or url_for('static', filename='placeholder.svg') }}"
         data-ingredients='{{ recipe.ingredients.split("\n")|tojson }}'
-        data-instructions='{{ recipe.instructions.split("\n")|tojson }}'>
+        data-instructions='{{ recipe.instructions.split("\n")|tojson }}'
+        data-favorite="{{ 'true' if recipe.favorite else 'false' }}">
         <div class="pin-media">
           <img src="{{ recipe.image_url or url_for('static', filename='placeholder.svg') }}" alt="{{ recipe.title }}" loading="lazy">
-          <button class="pin-fav" type="button" aria-label="Favoritar">♡</button>
+          <button class="pin-fav {% if recipe.favorite %}is-favorite{% endif %}" type="button"
+            aria-label="{{ 'Remover dos favoritos' if recipe.favorite else 'Favoritar' }}"
+            aria-pressed="{{ 'true' if recipe.favorite else 'false' }}">
+            {{ '♥' if recipe.favorite else '♡' }}
+          </button>
         </div>
         <div class="pin-info">
           <h3>{{ recipe.title }}</h3>
@@ -34,7 +39,11 @@
   </div>
   {% else %}
     <div class="empty-state">
-      <p>Ainda não temos receitas cadastradas. Clique em "Cadastrar Receita" no topo para adicionar a primeira delícia!</p>
+      {% if showing_favorites %}
+        <p>Você ainda não marcou favoritos. Clique no coração de uma receita para vê-la aqui.</p>
+      {% else %}
+        <p>Ainda não temos receitas cadastradas. Clique em "Cadastrar Receita" no topo para adicionar a primeira delícia!</p>
+      {% endif %}
     </div>
   {% endif %}
 </section>
@@ -73,6 +82,15 @@
   const modalInstructions = document.getElementById('modal-instructions');
   const editLink = document.getElementById('edit-link');
   const deleteForm = document.getElementById('delete-form');
+  const favoritesOnly = new URLSearchParams(window.location.search).get('favorites') === '1';
+
+  function renderEmptyFavoritesStateIfNeeded() {
+    const grid = document.querySelector('.pin-grid');
+    if (favoritesOnly && grid && grid.children.length === 0) {
+      const gallery = document.querySelector('.gallery');
+      gallery.innerHTML = '<div class="empty-state"><p>Você ainda não marcou favoritos. Clique no coração de uma receita para vê-la aqui.</p></div>';
+    }
+  }
 
   function closeModal() {
     modal.setAttribute('aria-hidden', 'true');
@@ -118,6 +136,52 @@
       }
     });
   });
+
+  function updateFavoriteButton(button, isFavorite) {
+    button.classList.toggle('is-favorite', isFavorite);
+    button.setAttribute('aria-pressed', isFavorite.toString());
+    button.setAttribute('aria-label', isFavorite ? 'Remover dos favoritos' : 'Favoritar');
+    button.textContent = isFavorite ? '♥' : '♡';
+  }
+
+  document.querySelectorAll('.pin-fav').forEach(button => {
+    const card = button.closest('.pin-card');
+    const recipeId = card.dataset.id;
+
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const nextFavoriteState = card.dataset.favorite !== 'true';
+
+      fetch(`/api/recipes/${recipeId}/favorite`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ favorite: nextFavoriteState })
+      })
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error('Erro ao atualizar favorito');
+          }
+          return res.json();
+        })
+        .then((data) => {
+          const isFavorite = !!data.favorite;
+          card.dataset.favorite = isFavorite.toString();
+          updateFavoriteButton(button, isFavorite);
+
+          if (favoritesOnly && !isFavorite) {
+            card.remove();
+            renderEmptyFavoritesStateIfNeeded();
+          }
+        })
+        .catch(() => {
+          alert('Não foi possível atualizar o favorito agora. Tente novamente.');
+        });
+    });
+
+    updateFavoriteButton(button, card.dataset.favorite === 'true');
+  });
+
+  renderEmptyFavoritesStateIfNeeded();
 
   document.querySelectorAll('[data-close]').forEach(el => {
     el.addEventListener('click', closeModal);

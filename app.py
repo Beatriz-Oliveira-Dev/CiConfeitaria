@@ -25,8 +25,7 @@ class Recipe(db.Model):
     ingredients = db.Column(db.Text, nullable=False)
     instructions = db.Column(db.Text, nullable=False)
     image_url = db.Column(db.String(255))
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-
+    favorite = db.Column(db.Boolean, nullable=False, default=False)
     def to_dict(self) -> dict:
         return {
             "id": self.id,
@@ -35,6 +34,7 @@ class Recipe(db.Model):
             "ingredients": self.ingredients,
             "instructions": self.instructions,
             "image_url": self.image_url,
+            "favorite": self.favorite,
             "created_at": self.created_at.isoformat(),
         }
 
@@ -49,14 +49,23 @@ def parse_multiline_field(value: str) -> str:
 
 @app.route("/")
 def index():
-    recipes: List[Recipe] = Recipe.query.order_by(Recipe.created_at.desc()).all()
-    return render_template("index.html", recipes=recipes)
+    favorites_only = request.args.get("favorites", default=0, type=int) == 1
+    base_query = Recipe.query.order_by(Recipe.created_at.desc())
+    recipes: List[Recipe] = (
+        base_query.filter_by(favorite=True).all()
+        if favorites_only
+        else base_query.all()
+    )
+    return render_template(
+        "index.html", recipes=recipes, showing_favorites=favorites_only
+    )
 
 @app.route("/cadastrar")
 def form_page():
     recipe_id = request.args.get("recipe_id", type=int)
     recipe = Recipe.query.get_or_404(recipe_id) if recipe_id else None
     return render_template("create.html", recipe=recipe)
+
 @app.route("/recipes", methods=["POST"])
 def create_recipe():
     title = request.form.get("title", "").strip()
@@ -117,6 +126,19 @@ def list_recipes():
     return jsonify([recipe.to_dict() for recipe in recipes])
 
 
+@app.route("/api/recipes/<int:recipe_id>/favorite", methods=["PATCH", "POST"])
+def api_toggle_favorite(recipe_id: int):
+    recipe = Recipe.query.get_or_404(recipe_id)
+    data = request.get_json() or {}
+
+    if "favorite" not in data:
+        return jsonify({"error": "Campo 'favorite' é obrigatório."}), 400
+
+    recipe.favorite = bool(data.get("favorite"))
+    db.session.commit()
+
+    return jsonify(recipe.to_dict())
+
 @app.route("/api/recipes", methods=["POST"])
 def api_create_recipe():
     data = request.get_json() or {}
@@ -165,6 +187,7 @@ def api_update_recipe(recipe_id: int):
     db.session.commit()
 
     return jsonify(recipe.to_dict())
+
 @app.route("/api/recipes/<int:recipe_id>", methods=["DELETE"])
 def api_delete_recipe(recipe_id: int):
     recipe = Recipe.query.get_or_404(recipe_id)
