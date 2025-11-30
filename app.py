@@ -26,8 +26,6 @@ class Recipe(db.Model):
     instructions = db.Column(db.Text, nullable=False)
     image_url = db.Column(db.String(255))
     favorite = db.Column(db.Boolean, nullable=False, default=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-
     def to_dict(self) -> dict:
         return {
             "id": self.id,
@@ -62,13 +60,11 @@ def index():
         "index.html", recipes=recipes, showing_favorites=favorites_only
     )
 
-
 @app.route("/cadastrar")
 def form_page():
     recipe_id = request.args.get("recipe_id", type=int)
     recipe = Recipe.query.get_or_404(recipe_id) if recipe_id else None
     return render_template("create.html", recipe=recipe)
-
 
 @app.route("/recipes", methods=["POST"])
 def create_recipe():
@@ -81,7 +77,6 @@ def create_recipe():
     if not all([title, description, ingredients, instructions]):
         error = "Todos os campos obrigatórios devem ser preenchidos."
         return render_template("create.html", recipe=None, error=error), 400
-
     recipe = Recipe(
         title=title,
         description=description,
@@ -93,7 +88,6 @@ def create_recipe():
     db.session.commit()
 
     return redirect(url_for("index"))
-
 
 @app.route("/recipes/<int:recipe_id>/update", methods=["POST"])
 def update_recipe(recipe_id: int):
@@ -117,7 +111,6 @@ def update_recipe(recipe_id: int):
     db.session.commit()
 
     return redirect(url_for("index"))
-
 
 @app.route("/recipes/<int:recipe_id>/delete", methods=["POST"])
 def delete_recipe(recipe_id: int):
@@ -146,7 +139,6 @@ def api_toggle_favorite(recipe_id: int):
 
     return jsonify(recipe.to_dict())
 
-
 @app.route("/api/recipes", methods=["POST"])
 def api_create_recipe():
     data = request.get_json() or {}
@@ -170,7 +162,6 @@ def api_create_recipe():
     db.session.commit()
 
     return jsonify(recipe.to_dict()), 201
-
 
 @app.route("/api/recipes/<int:recipe_id>", methods=["PUT", "PATCH"])
 def api_update_recipe(recipe_id: int):
@@ -196,7 +187,6 @@ def api_update_recipe(recipe_id: int):
     db.session.commit()
 
     return jsonify(recipe.to_dict())
-
 
 @app.route("/api/recipes/<int:recipe_id>", methods=["DELETE"])
 def api_delete_recipe(recipe_id: int):
