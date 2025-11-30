@@ -26,6 +26,12 @@ class Recipe(db.Model):
     instructions = db.Column(db.Text, nullable=False)
     image_url = db.Column(db.String(255))
     favorite = db.Column(db.Boolean, nullable=False, default=False)
+    # Price in currency (float), available sizes and fillings stored as newline-separated text
+    price = db.Column(db.Float, nullable=True)
+    sizes = db.Column(db.Text, nullable=True)
+    fillings = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    
     def to_dict(self) -> dict:
         return {
             "id": self.id,
@@ -35,6 +41,9 @@ class Recipe(db.Model):
             "instructions": self.instructions,
             "image_url": self.image_url,
             "favorite": self.favorite,
+            "price": self.price,
+            "sizes": (self.sizes or "").splitlines(),
+            "fillings": (self.fillings or "").splitlines(),
             "created_at": self.created_at.isoformat(),
         }
 

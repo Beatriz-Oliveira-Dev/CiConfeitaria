@@ -21,6 +21,9 @@
         data-image="{{ recipe.image_url or url_for('static', filename='placeholder.svg') }}"
         data-ingredients='{{ recipe.ingredients.split("\n")|tojson }}'
         data-instructions='{{ recipe.instructions.split("\n")|tojson }}'
+        data-sizes='{{ (recipe.sizes or "").split("\n")|tojson }}'
+        data-fillings='{{ (recipe.fillings or "").split("\n")|tojson }}'
+        data-price='{{ recipe.price if recipe.price is not none else "" }}'
         data-favorite="{{ 'true' if recipe.favorite else 'false' }}">
         <div class="pin-media">
           <img src="{{ recipe.image_url or url_for('static', filename='placeholder.svg') }}" alt="{{ recipe.title }}" loading="lazy">
@@ -33,6 +36,9 @@
         <div class="pin-info">
           <h3>{{ recipe.title }}</h3>
           <p>{{ recipe.description }}</p>
+          {% if recipe.price is not none %}
+          <p class="muted">Preço: R$ {{ '%.2f'|format(recipe.price) }}</p>
+          {% endif %}
         </div>
       </article>
     {% endfor %}
@@ -59,12 +65,18 @@
       <p class="eyebrow">Receita</p>
       <h2 id="modal-title"></h2>
       <p id="modal-description" class="lead"></p>
+      <p id="modal-price" class="muted"></p>
+      <h4>Tamanhos</h4>
+      <ul id="modal-sizes"></ul>
+      <h4>Recheios</h4>
+      <ul id="modal-fillings"></ul>
       <h3>Ingredientes</h3>
       <ul id="modal-ingredients"></ul>
       <h3>Modo de Preparo</h3>
       <ol id="modal-instructions"></ol>
       <div class="modal-actions">
         <a class="btn ghost" id="edit-link" href="#">Atualizar História</a>
+          <a class="btn" id="whatsapp-link" href="#" target="_blank">Enviar por WhatsApp</a>
         <form id="delete-form" method="post" action="#">
           <button type="submit" class="btn danger">Deletar Receita</button>
         </form>
@@ -121,8 +133,40 @@
       modalInstructions.appendChild(li);
     });
 
+    // sizes & fillings
+    const sizes = JSON.parse(card.dataset.sizes || '[]');
+    const fillings = JSON.parse(card.dataset.fillings || '[]');
+
+    const sizesEl = document.getElementById('modal-sizes');
+    const fillingsEl = document.getElementById('modal-fillings');
+    if (sizesEl) {
+      sizesEl.innerHTML = '';
+      sizes.forEach(s => {
+        const li = document.createElement('li'); li.textContent = s; sizesEl.appendChild(li);
+      });
+    }
+    if (fillingsEl) {
+      fillingsEl.innerHTML = '';
+      fillings.forEach(f => {
+        const li = document.createElement('li'); li.textContent = f; fillingsEl.appendChild(li);
+      });
+    }
+
+    const price = card.dataset.price || '';
+    const modalPrice = document.getElementById('modal-price');
+    if (modalPrice) {
+      modalPrice.textContent = price ? `R$ ${Number(price).toFixed(2)}` : '';
+    }
+
     editLink.href = `${card.dataset.id ? '/cadastrar?recipe_id=' + card.dataset.id : '#'}`;
     deleteForm.action = `/recipes/${card.dataset.id}/delete`;
+    // WhatsApp quick link
+    const whatsappBtn = document.getElementById('whatsapp-link');
+    if (whatsappBtn) {
+      const shareText = `${title}\n${description}${price ? `\nPreço: R$ ${price}` : ''}${sizes.length ? `\nTamanhos: ${sizes.join(', ')}` : ''}${fillings.length ? `\nRecheios: ${fillings.join(', ')}` : ''}`;
+      const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+      whatsappBtn.href = waUrl;
+    }
 
     modal.setAttribute('aria-hidden', 'false');
     modal.classList.add('open');

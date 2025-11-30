@@ -70,6 +70,9 @@ def recipes_payload() -> List[Dict[str, Optional[str]]]:
                 ]
             ),
             "image_url": images["macarrons"],
+            "price": 35.0,
+            "sizes": "P\nM\nG",
+            "fillings": "Ganache de chocolate\nGeleia de framboesa\nCreme de baunilha",
         },
         {
             "title": "Cheesecake de Frutas Vermelhas",
@@ -96,6 +99,9 @@ def recipes_payload() -> List[Dict[str, Optional[str]]]:
                 ]
             ),
             "image_url": images["cheesecake"],
+            "price": 65.0,
+            "sizes": "Pequeno\nMédio\nGrande",
+            "fillings": "Calda de frutas vermelhas\nDoce de leite",
         },
         {
             "title": "Bolo Red Velvet",
@@ -124,6 +130,9 @@ def recipes_payload() -> List[Dict[str, Optional[str]]]:
                 ]
             ),
             "image_url": images["red velvet"],
+            "price": 80.0,
+            "sizes": "Fatia\nInteiro",
+            "fillings": "Cream cheese\nGanache",
         },
     ]
 
